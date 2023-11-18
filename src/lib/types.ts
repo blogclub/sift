@@ -89,10 +89,10 @@ interface Mapping {
 	similarity: number;
 }
 
-interface Title {
+export interface Title {
 	native: string;
 	romaji: string;
-	english?: string;
+	english: string;
 }
 
 export interface EpisodeData {
@@ -102,14 +102,14 @@ export interface EpisodeData {
 
 export interface SourceInfo {
 	sources: Source[];
-	default?: string;
+	default: string;
 	subtitles: any[];
 	intro: Intro;
 	outro: Intro;
 	headers: Headers;
 }
 
-interface Headers {
+export interface Headers {
 	Referer?: string;
 }
 
@@ -123,9 +123,21 @@ interface Source {
 	quality: string;
 }
 
-export interface EpisodeCovers {
-	episode: number;
-	img: string;
+export interface ContentMetadata {
+	providerId: string;
+	data: Datum[];
+}
+
+interface Datum {
+	id: string;
+	description?: string;
+	hasDub: boolean;
+	img?: undefined | string;
+	isFiller: boolean;
+	number: number;
+	title: string;
+	updatedAt: number;
+	rating?: number;
 }
 
 export interface SeasonalData {

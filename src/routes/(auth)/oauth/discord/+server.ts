@@ -2,7 +2,7 @@ import type { RequestHandler } from './$types';
 import { auth, discordAuth } from '$lib/server/lucia';
 import { redirect } from 'sveltekit-flash-message/server';
 import { error } from '@sveltejs/kit';
-import { OWNER_ID } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { prisma } from '$lib/server/prisma';
 
 export const GET: RequestHandler = async (event) => {
@@ -22,15 +22,16 @@ export const GET: RequestHandler = async (event) => {
 	}
 
 	try {
-		const { existingUser, discordUser, createUser } = await discordAuth.validateCallback(code);
+		const { getExistingUser, discordUser, createUser } = await discordAuth.validateCallback(code);
 
+		const existingUser = await getExistingUser();
 		const getUser = async () => {
 			if (existingUser) return existingUser;
 			return await createUser({
 				attributes: {
 					discordId: discordUser.id,
 					username: discordUser.username,
-					authorized: discordUser.id == OWNER_ID ? true : false
+					authorized: discordUser.id == env?.OWNER_ID ? true : false
 				}
 			});
 		};

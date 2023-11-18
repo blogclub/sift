@@ -2,7 +2,9 @@
 	import type { PageData } from './$types';
 	import type { EpisodeData } from '$lib/types';
 	import { onMount } from 'svelte';
-	import { bestFallback } from '$lib/api';
+	import { get } from 'svelte/store';
+	import { preferences } from '$lib/settings';
+	import { bestFallback, validCover } from '$lib/api';
 	import { Label } from '$components/ui/label';
 	import { Badge } from '$components/ui/badge';
 	import { Switch } from '$components/ui/switch';
@@ -24,6 +26,8 @@
 	let checked: boolean = false;
 	let dubbed: EpisodeData[] = [];
 
+	let nameType = get(preferences).type;
+
 	data.episodes.forEach((provider) => {
 		if (provider.episodes.filter((episode) => episode.hasDub).length == 0) return;
 
@@ -37,8 +41,8 @@
 	let simklId = data.info.mappings.find((provider) => provider.providerId === 'simkl')?.id;
 </script>
 
-<section class="container my-10 space-y-10 px-6 lg:px-8">
-	<div class="flex flex-col gap-8 md:flex-row">
+<section class="my-10 space-y-10 px-6 lg:px-8">
+	<div class="mx-auto flex max-w-[1400px] flex-col gap-8 md:flex-row">
 		<div
 			class="max-w-[15rem] flex-shrink-0 space-y-3 self-center md:max-w-[20rem] md:self-start lg:max-w-sm"
 		>
@@ -89,7 +93,7 @@
 			</div>
 		</div>
 		<div class="space-y-3">
-			<h1 class="text-4xl font-semibold">{data.info.title.romaji}</h1>
+			<h1 class="text-4xl font-semibold">{data.info.title[nameType]}</h1>
 			{#if data.info?.year}
 				<h1 class="text-muted-foreground">
 					{data.info.season == 'UNKNOWN' ? '' : data.info.season}
@@ -112,13 +116,13 @@
 			<h1>Episodes</h1>
 			<div class="flex items-center gap-3">
 				<Label class="text-sm text-muted-foreground">Dubbed</Label>
-				<Switch bind:rootChecked={checked} />
+				<Switch bind:checked />
 			</div>
 		</div>
 
 		<Tabs value={checked ? dubbed[0]?.providerId : data?.episodes[0]?.providerId} class="w-full">
 			<TabsList
-				class={`mb-6 grid w-full grid-cols-1 sm:grid-cols-${
+				class={`mb-6 grid h-min w-full grid-cols-1 sm:grid-cols-${
 					checked ? dubbed.length : data.episodes.length
 				}`}
 			>
@@ -149,13 +153,13 @@
 								<h1 class="flex-grow p-2 pl-1 pr-3 font-medium lg:text-lg">
 									{episode.title || episode.id}
 								</h1>
-								{#if data.covers[episode.number - 1]?.img && data.covers[episode.number - 1]?.img !== 'https://simkl.in/episodes/null_c.jpg'}
+								{#if validCover(data.covers[0]?.data[episode.number - 1]?.img)}
 									<div class="m-2 hidden min-w-[210px] overflow-hidden rounded-md md:block">
 										<img
 											loading="lazy"
 											width="210"
 											height="118"
-											src={data.covers[episode.number - 1]?.img}
+											src={data.covers[0]?.data[episode.number - 1]?.img}
 											alt="episode cover"
 										/>
 									</div>
